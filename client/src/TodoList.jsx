@@ -112,7 +112,7 @@ const TodoList = () => {
     };
 
     return (
-        <div className="todo-list-container bg-linear-to-br from-blue-100 to-indigo-50 min-h-screen p-6">
+        <div className="todo-list-container bg-linear-to-br from-blue-100 to-indigo-50 min-h-screen p-2 sm:p-6">
             <div className="max-w-6xl mx-auto">
                 <header className="flex items-center justify-between mb-6">
                     <h1 className="text-2xl sm:text-3xl font-semibold text-slate-800">
@@ -130,65 +130,17 @@ const TodoList = () => {
                     </div>
                 </header>
 
-                <section className="bg-white shadow rounded-lg p-4">
-                    {/* Filters */}
-                    <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between mb-4">
-                        <div className="flex gap-3 flex-1">
-                            <div className="flex items-center bg-slate-50 rounded px-3 py-2 gap-2">
-                                <FiSearch className="text-slate-400" />
-                                <input
-                                    value={query}
-                                    onChange={(e) => setQuery(e.target.value)}
-                                    placeholder="Search title or description..."
-                                    className="bg-transparent outline-none text-slate-700"
-                                />
-                                {query && (
-                                    <button
-                                        className="ml-2 text-slate-400 hover:text-slate-700"
-                                        onClick={() => setQuery("")}
-                                        aria-label="clear"
-                                    >
-                                        <FiX />
-                                    </button>
-                                )}
-                            </div>
-
-                            <select
-                                value={statusFilter}
-                                onChange={(e) => setStatusFilter(e.target.value)}
-                                className="px-3 py-2 rounded border bg-white"
-                            >
-                                <option>All</option>
-                                <option>Pending</option>
-                                <option>Completed</option>
-                            </select>
-
-                            <input
-                                type="date"
-                                value={dueDateFilter}
-                                onChange={(e) => setDueDateFilter(e.target.value)}
-                                className="px-3 py-2 rounded border bg-white"
-                                title="Filter by due date (show tasks due on or before)"
-                            />
-
-                            <button
-                                onClick={() => {
-                                    setStatusFilter("All");
-                                    setDueDateFilter("");
-                                    setQuery("");
-                                }}
-                                className="px-3 py-2 rounded border bg-slate-50"
-                                title="Reset filters"
-                            >
-                                Reset
-                            </button>
-                        </div>
-
-                        <div className="text-sm text-slate-500">
-                            Showing <span className="font-medium text-slate-700">{filtered.length}</span> of{" "}
-                            <span className="font-medium text-slate-700">{tasks.length}</span> tasks
-                        </div>
-                    </div>
+                <section className="bg-white shadow rounded-lg p-2 sm:p-4">
+                    <FilterSection
+                        statusFilter={statusFilter}
+                        setStatusFilter={setStatusFilter}
+                        dueDateFilter={dueDateFilter}
+                        setDueDateFilter={setDueDateFilter}
+                        query={query}
+                        setQuery={setQuery}
+                        filtered={filtered}
+                        tasks={tasks}
+                    />
 
                     {/* Table header */}
                     <div className="hidden sm:grid grid-cols-[2fr_3fr_1fr_1fr_40px] gap-2 text-slate-600 text-sm font-medium border-b pb-2 mb-2">
@@ -207,58 +159,60 @@ const TodoList = () => {
                                 className="bg-white border rounded-lg shadow-sm p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4"
                             >
                                 <div className="flex-1">
-                                    <div className="flex items-start justify-between gap-3">
-                                        <div>
+                                    <div className="flex flex-wrap items-start justify-between gap-3">
+                                        <div className="flex-1 min-w-full sm:min-w-100">
                                             <h3 className="text-lg font-semibold text-slate-800">{t.title}</h3>
                                             <p className="text-sm text-slate-500 mt-1 hidden sm:block">
                                                 {t.description}
                                             </p>
                                         </div>
 
-                                        <div className="flex items-center gap-3 sm:flex-col sm:items-end">
-                                            <div className="text-sm text-slate-500 sm:text-right">
-                                                <div className="font-medium text-slate-800">
-                                                    {formatDateDisplay(t.dueDate)}
+                                        <div className="max-md:w-full">
+                                            <div className="flex gap-3 sm:justify-between md:flex-col sm:items-end">
+                                                <div className="text-sm text-slate-500 sm:text-right">
+                                                    <div className="font-medium text-slate-800">
+                                                        {formatDateDisplay(t.dueDate)}
+                                                    </div>
+                                                    <div className="text-xs mt-1">
+                                                        {t.completed ? (
+                                                            <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
+                                                                Completed
+                                                            </span>
+                                                        ) : (
+                                                            <span className="px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded-full">
+                                                                Pending
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                                <div className="text-xs mt-1">
-                                                    {t.completed ? (
-                                                        <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
-                                                            Completed
-                                                        </span>
-                                                    ) : (
-                                                        <span className="px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded-full">
-                                                            Pending
-                                                        </span>
-                                                    )}
+
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={() => toggleComplete(t.id)}
+                                                        className={`px-3 py-1 rounded text-sm font-medium ${t.completed
+                                                            ? "bg-green-50 text-green-700 border border-green-100"
+                                                            : "bg-yellow-50 text-yellow-800 border border-yellow-100"
+                                                            }`}
+                                                    >
+                                                        {t.completed ? "Mark Pending" : "Mark Done"}
+                                                    </button>
+
+                                                    <button
+                                                        onClick={() => openEdit(t)}
+                                                        className="p-2 rounded text-indigo-600 hover:bg-indigo-50"
+                                                        title="Edit"
+                                                    >
+                                                        <FiEdit />
+                                                    </button>
+
+                                                    <button
+                                                        onClick={() => removeTask(t.id)}
+                                                        className="p-2 rounded text-red-600 hover:bg-red-50"
+                                                        title="Delete"
+                                                    >
+                                                        <FiTrash2 />
+                                                    </button>
                                                 </div>
-                                            </div>
-
-                                            <div className="flex items-center gap-2">
-                                                <button
-                                                    onClick={() => toggleComplete(t.id)}
-                                                    className={`px-3 py-1 rounded text-sm font-medium ${t.completed
-                                                        ? "bg-green-50 text-green-700 border border-green-100"
-                                                        : "bg-yellow-50 text-yellow-800 border border-yellow-100"
-                                                        }`}
-                                                >
-                                                    {t.completed ? "Mark Pending" : "Mark Done"}
-                                                </button>
-
-                                                <button
-                                                    onClick={() => openEdit(t)}
-                                                    className="p-2 rounded text-indigo-600 hover:bg-indigo-50"
-                                                    title="Edit"
-                                                >
-                                                    <FiEdit />
-                                                </button>
-
-                                                <button
-                                                    onClick={() => removeTask(t.id)}
-                                                    className="p-2 rounded text-red-600 hover:bg-red-50"
-                                                    title="Delete"
-                                                >
-                                                    <FiTrash2 />
-                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -288,6 +242,69 @@ const TodoList = () => {
         </div>
     );
 };
+
+// Filter Section Component
+const FilterSection = ({ statusFilter, setStatusFilter, dueDateFilter, setDueDateFilter, query, setQuery, filtered, tasks }) => {
+    return (
+        <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between mb-4">
+            <div className="flex flex-wrap gap-3 flex-1">
+                <div className="flex items-center bg-slate-50 rounded px-3 py-2 gap-2">
+                    <FiSearch className="text-slate-400" />
+                    <input
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        placeholder="Search title or description..."
+                        className="bg-transparent outline-none text-slate-700"
+                    />
+                    {query && (
+                        <button
+                            className="ml-2 text-slate-400 hover:text-slate-700"
+                            onClick={() => setQuery("")}
+                            aria-label="clear"
+                        >
+                            <FiX />
+                        </button>
+                    )}
+                </div>
+
+                <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="px-3 py-2 rounded border bg-white"
+                >
+                    <option>All</option>
+                    <option>Pending</option>
+                    <option>Completed</option>
+                </select>
+
+                <input
+                    type="date"
+                    value={dueDateFilter}
+                    onChange={(e) => setDueDateFilter(e.target.value)}
+                    className="px-3 py-2 rounded border bg-white"
+                    title="Filter by due date (show tasks due on or before)"
+                />
+
+                <button
+                    onClick={() => {
+                        setStatusFilter("All");
+                        setDueDateFilter("");
+                        setQuery("");
+                    }}
+                    className="px-3 py-2 rounded border bg-slate-50"
+                    title="Reset filters"
+                >
+                    Reset
+                </button>
+            </div>
+
+            <div className="text-sm text-slate-500">
+                Showing <span className="font-medium text-slate-700">{filtered.length}</span> of{" "}
+                <span className="font-medium text-slate-700">{tasks.length}</span> tasks
+            </div>
+        </div>
+    );
+}
 
 // Edit/Create Modal Component
 const EditCreateModal = ({ form, setForm, onSave, onClose, error, isNew }) => {
