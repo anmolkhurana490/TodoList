@@ -8,14 +8,15 @@ const TodoList = () => {
     const [tasks, setTasks] = useState([]);
 
     const [statusFilter, setStatusFilter] = useState("All"); // All | Pending | Completed
-    const [dueDateFilter, setDueDateFilter] = useState(""); // yyyy-mm-dd
+    const [dueDateFilter, setDueDateFilter] = useState(""); // yyyy-mm-dd or empty
     const [query, setQuery] = useState("");
     const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchTasks = async () => {
             const data = await getTasks();
-            if (data) setTasks(data);
+            // Sort by due date ascending
+            if (data) setTasks(data.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate)));
         };
         fetchTasks();
     }, [])
