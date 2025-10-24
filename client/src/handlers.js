@@ -12,9 +12,9 @@ export const createTask = async (task) => {
     }
 };
 
-export const getTasks = async (params) => {
+export const getTasks = async () => {
     try {
-        const response = await axios.get(`${apiURL}/tasks`, { params });
+        const response = await axios.get(`${apiURL}/tasks`);
         return response.data;
     } catch (error) {
         console.error("Error fetching tasks:", error.response.data);
