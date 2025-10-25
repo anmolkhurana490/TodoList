@@ -6,7 +6,7 @@ const Navbar = () => {
     const links = ['Home', 'About', 'Contact']
 
     return (
-        <header className="w-full sticky top-0 z-50">
+        <header className="w-full sticky bg-white border border-b top-0 z-50">
             <nav className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between py-4">
                     {/* Brand */}
