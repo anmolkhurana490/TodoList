@@ -10,9 +10,9 @@ console.log(process.env.CLIENT_URL)
 
 const app = express();
 app.use(cors({
-    origin: '*',
+    origin: [process.env.CLIENT_URL, 'http://localhost:5173'],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Access-Control-Allow-Origin'],
 }));
 
 app.use(bodyParser.urlencoded({ extended: true }));
