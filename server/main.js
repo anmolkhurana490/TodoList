@@ -12,7 +12,7 @@ const app = express();
 app.use(cors({
     origin: [process.env.CLIENT_URL, 'http://localhost:5173'],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Access-Control-Allow-Origin'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept', 'X-Requested-With', 'Access-Control-Allow-Origin'],
 }));
 
 app.use(bodyParser.urlencoded({ extended: true }));
