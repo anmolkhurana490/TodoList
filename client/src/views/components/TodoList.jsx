@@ -1,25 +1,18 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { FiEdit, FiTrash2, FiPlus, FiSearch, FiX } from "react-icons/fi";
-import { createTask, updateTask, deleteTask, getTasks } from './handlers';
+import TaskViewModel from '../../viewmodels/TaskViewModel';
 
 const formatDateDisplay = (iso) => iso ? new Date(iso).toLocaleDateString() : "—";
 
 const TodoList = () => {
-    const [tasks, setTasks] = useState([]);
+    const {
+        tasks, filtered, error,
+        applyFilters, getFilters, clearFilters,
+        createTask, updateTask, toggleCompleteTask, removeTask
+    } = TaskViewModel();
 
-    const [statusFilter, setStatusFilter] = useState("All"); // All | Pending | Completed
-    const [dueDateFilter, setDueDateFilter] = useState(""); // yyyy-mm-dd or empty
-    const [query, setQuery] = useState("");
-    const [error, setError] = useState(null);
-
-    useEffect(() => {
-        const fetchTasks = async () => {
-            const data = await getTasks();
-            // Sort by due date ascending
-            if (data) setTasks(data.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate)));
-        };
-        fetchTasks();
-    }, [])
+    // Edit modal state
+    const [editing, setEditing] = useState(null); // task object or null
 
     const [form, setForm] = useState({
         title: "",
@@ -27,30 +20,6 @@ const TodoList = () => {
         dueDate: "",
         completed: false,
     });
-
-    // Edit modal state
-    const [editing, setEditing] = useState(null); // task object or null
-
-    // Derived filtered list
-    const filtered = useMemo(() => {
-        return tasks.filter((t) => {
-            const statusMatches =
-                statusFilter === "All" ||
-                (statusFilter === "Completed" && t.completed) ||
-                (statusFilter === "Pending" && !t.completed);
-
-            const dueMatches =
-                !dueDateFilter ||
-                new Date(t.dueDate) <= new Date(dueDateFilter + "T23:59:59");
-
-            const queryMatches =
-                !query ||
-                t.title.toLowerCase().includes(query.toLowerCase()) ||
-                t.description.toLowerCase().includes(query.toLowerCase());
-
-            return statusMatches && dueMatches && queryMatches;
-        });
-    }, [tasks, statusFilter, dueDateFilter, query]);
 
     const openEdit = (task) => {
         setEditing(task.id);
@@ -73,42 +42,18 @@ const TodoList = () => {
     };
 
     const saveEdit = async () => {
-        if (!form.title.trim() || !form.dueDate) {
-            setError("Title and Due Date are required.");
-            return;
-        }
-
         if (editing === "new") {
-            const data = await createTask(form);
-            if (data) setTasks([{ id: data.id, ...form }, ...tasks]);
-            else return setError("Failed to create task.");
+            const success = await createTask(form);
+            if (success) closeEditor();
         } else {
-            const data = await updateTask(editing, form);
-            if (data) setTasks(tasks.map((t) => (t.id === editing ? { ...t, ...form } : t)));
-            else return setError("Failed to update task.");
+            const success = await updateTask(editing, form);
+            if (success) closeEditor();
         }
-
-        closeEditor();
-        setError(null);
-    };
-
-    const toggleComplete = async (id) => {
-        const task = tasks.find((t) => t.id === id);
-        const data = await updateTask(id, { ...task, completed: !task.completed });
-        if (data) setTasks(tasks.map(t => (t.id === id ? data : t)));
     };
 
     const closeEditor = () => {
         setEditing(null);
         setForm({ title: "", description: "", dueDate: "", completed: false });
-    };
-
-    const removeTask = async (id) => {
-        if (!confirm("Delete this task?")) return;
-        const deleted = await deleteTask(id);
-
-        if (deleted) setTasks(tasks.filter((t) => t.id !== id));
-        else setError("Failed to delete task.");
     };
 
     return (
@@ -132,14 +77,11 @@ const TodoList = () => {
 
                 <section className="bg-white shadow rounded-lg p-2 sm:p-4">
                     <FilterSection
-                        statusFilter={statusFilter}
-                        setStatusFilter={setStatusFilter}
-                        dueDateFilter={dueDateFilter}
-                        setDueDateFilter={setDueDateFilter}
-                        query={query}
-                        setQuery={setQuery}
-                        filtered={filtered}
-                        tasks={tasks}
+                        getFilters={getFilters}
+                        applyFilters={applyFilters}
+                        clearFilters={clearFilters}
+                        numFiltered={filtered.length}
+                        numTasks={tasks.length}
                     />
 
                     {/* Table header */}
@@ -188,7 +130,7 @@ const TodoList = () => {
 
                                                 <div className="flex items-center gap-2">
                                                     <button
-                                                        onClick={() => toggleComplete(t.id)}
+                                                        onClick={() => toggleCompleteTask(t.id)}
                                                         className={`px-3 py-1 rounded text-sm font-medium ${t.completed
                                                             ? "bg-green-50 text-green-700 border border-green-100"
                                                             : "bg-yellow-50 text-yellow-800 border border-yellow-100"
@@ -236,7 +178,7 @@ const TodoList = () => {
                 setForm={setForm}
                 onClose={closeEditor}
                 onSave={saveEdit}
-                erorr={error}
+                error={error}
                 isNew={editing === "new"}
             />}
         </div>
@@ -244,19 +186,25 @@ const TodoList = () => {
 };
 
 // Filter Section Component
-const FilterSection = ({ statusFilter, setStatusFilter, dueDateFilter, setDueDateFilter, query, setQuery, filtered, tasks }) => {
+const FilterSection = ({ getFilters, applyFilters, clearFilters, numFiltered, numTasks }) => {
+    const filters = getFilters();
+
+    const onChangeFilters = (taskStatus = filters.status, dueDate = filters.dueDate, query = filters.query) => {
+        applyFilters(taskStatus, dueDate, query);
+    }
+
     return (
         <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between mb-4">
             <div className="flex flex-wrap gap-3 flex-1">
                 <div className="flex items-center bg-slate-50 rounded px-3 py-2 gap-2">
                     <FiSearch className="text-slate-400" />
                     <input
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
+                        value={filters.query}
+                        onChange={(e) => onChangeFilters(query = e.target.value)}
                         placeholder="Search title or description..."
                         className="bg-transparent outline-none text-slate-700"
                     />
-                    {query && (
+                    {filters.query && (
                         <button
                             className="ml-2 text-slate-400 hover:text-slate-700"
                             onClick={() => setQuery("")}
@@ -268,8 +216,8 @@ const FilterSection = ({ statusFilter, setStatusFilter, dueDateFilter, setDueDat
                 </div>
 
                 <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
+                    value={filters.status}
+                    onChange={(e) => onChangeFilters(taskStatus = e.target.value)}
                     className="px-3 py-2 rounded border bg-white"
                 >
                     <option>All</option>
@@ -279,18 +227,14 @@ const FilterSection = ({ statusFilter, setStatusFilter, dueDateFilter, setDueDat
 
                 <input
                     type="date"
-                    value={dueDateFilter}
-                    onChange={(e) => setDueDateFilter(e.target.value)}
+                    value={filters.dueDate}
+                    onChange={(e) => onChangeFilters(dueDate = e.target.value)}
                     className="px-3 py-2 rounded border bg-white"
                     title="Filter by due date (show tasks due on or before)"
                 />
 
                 <button
-                    onClick={() => {
-                        setStatusFilter("All");
-                        setDueDateFilter("");
-                        setQuery("");
-                    }}
+                    onClick={clearFilters}
                     className="px-3 py-2 rounded border bg-slate-50"
                     title="Reset filters"
                 >
@@ -299,8 +243,8 @@ const FilterSection = ({ statusFilter, setStatusFilter, dueDateFilter, setDueDat
             </div>
 
             <div className="text-sm text-slate-500">
-                Showing <span className="font-medium text-slate-700">{filtered.length}</span> of{" "}
-                <span className="font-medium text-slate-700">{tasks.length}</span> tasks
+                Showing <span className="font-medium text-slate-700">{numFiltered}</span> of{" "}
+                <span className="font-medium text-slate-700">{numTasks}</span> tasks
             </div>
         </div>
     );
