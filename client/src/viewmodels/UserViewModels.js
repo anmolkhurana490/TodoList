@@ -22,6 +22,7 @@ const useUserViewModel = () => {
             setUser(newUser);
         } catch (error) {
             console.error("Failed to register user:", error);
+            setUser(null);
         }
         setLoading(false);
     };
@@ -33,6 +34,7 @@ const useUserViewModel = () => {
             setUser(loggedInUser);
         } catch (error) {
             console.error("Failed to login user:", error);
+            setUser(null);
         }
         setLoading(false);
     };
@@ -44,6 +46,7 @@ const useUserViewModel = () => {
             setUser(profile);
         } catch (error) {
             console.error("Failed to fetch user profile:", error);
+            setUser(null);
         }
         setLoading(false);
     };
