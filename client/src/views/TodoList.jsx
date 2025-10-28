@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { FiEdit, FiTrash2, FiPlus, FiSearch, FiX } from "react-icons/fi";
-import TaskViewModel from '../../viewmodels/TaskViewModel';
+import TaskViewModel from '../viewmodels/TaskViewModel';
 
 const formatDateDisplay = (iso) => iso ? new Date(iso).toLocaleDateString() : "—";
 

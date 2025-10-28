@@ -1,6 +1,6 @@
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
-import TodoList from './components/TodoList'
+import TodoList from './TodoList'
 import Auth from './Auth'
 import useUserViewModel from '../viewmodels/UserViewModels'
 import { Routes, Route } from 'react-router-dom'

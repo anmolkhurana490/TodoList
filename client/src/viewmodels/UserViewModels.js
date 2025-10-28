@@ -7,13 +7,14 @@ const useUserViewModel = () => {
     const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
+    const location = window.location;
 
     const { registerUserApi, loginUserApi, getUserProfileApi, logoutUserApi } = UserAPI;
 
     useEffect(() => {
-        if (user) navigate('/todos');
-        else navigate('/auth');
-    }, [user]);
+        if (user && location.pathname !== '/todos') navigate('/todos');
+        else if (!user && location.pathname !== '/auth') navigate('/auth');
+    }, [user, location.pathname]);
 
     const registerUser = async (userData) => {
         setLoading(true);
