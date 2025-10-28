@@ -1,5 +1,5 @@
 import User from '../models/UserModel.js';
-import { generateToken } from '../utils/jwtUtils.js';
+import { setTokenCookie, clearTokenCookie } from '../utils/jwtUtils.js';
 
 // Register a new user
 export const registerUser = async (req, res) => {
@@ -63,28 +63,9 @@ export const getUserProfile = async (req, res) => {
 // Logout a user
 export const logoutUser = async (req, res) => {
     try {
-        res.clearCookie('auth_token', {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'PROD',
-            sameSite: process.env.NODE_ENV === 'PROD' ? 'none' : 'lax',
-            path: '/',
-        });
+        clearTokenCookie(res);
         return res.status(200).json({ message: 'Logout successful' });
     } catch (error) {
         return res.status(500).json({ message: 'Internal Error', error: error.message });
     }
-}
-
-// Helper function to set token cookie
-const setTokenCookie = (res, user) => {
-    // Generate token
-    const token = generateToken(user);
-
-    res.cookie('auth_token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'PROD',
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-        sameSite: process.env.NODE_ENV === 'PROD' ? 'none' : 'lax',
-        path: '/',
-    });
 }
