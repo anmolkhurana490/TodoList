@@ -4,7 +4,6 @@ dotenv.config();
 
 const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key';
 const EXPIRES_IN = '1h';
-console.log('Environment:', process.env.NODE_ENV);
 
 // Function to generate JWT
 export const generateToken = (payload) => {
