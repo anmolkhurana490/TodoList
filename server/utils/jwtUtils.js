@@ -4,6 +4,7 @@ dotenv.config();
 
 const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key';
 const EXPIRES_IN = '1h';
+console.log('Environment:', process.env.NODE_ENV);
 
 // Function to generate JWT
 export const generateToken = (payload) => {
@@ -25,21 +26,25 @@ export const setTokenCookie = (res, user) => {
     // Generate token
     const token = generateToken(user);
 
+    const isProduction = process.env.NODE_ENV === 'PROD';
+
     res.cookie('auth_token', token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'PROD',
+        secure: isProduction,
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-        sameSite: process.env.NODE_ENV === 'PROD' ? 'none' : 'lax',
+        sameSite: isProduction ? 'none' : 'lax',
         path: '/',
     });
 }
 
 // Helper function to clear token cookie
 export const clearTokenCookie = (res) => {
+    const isProduction = process.env.NODE_ENV === 'PROD';
+
     res.clearCookie('auth_token', {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'PROD',
-        sameSite: process.env.NODE_ENV === 'PROD' ? 'none' : 'lax',
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax',
         path: '/',
     });
 }
