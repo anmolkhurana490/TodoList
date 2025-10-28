@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
-import taskApi from "./taskAPI.js";
+import TaskAPI from "../services/TaskAPI";
 
 const useTaskViewModel = () => {
     const [tasks, setTasks] = useState([]);
-    const { getTasksApi, createTaskApi, updateTaskApi, deleteTaskApi } = taskApi;
+    const { getTasksApi, createTaskApi, updateTaskApi, deleteTaskApi } = TaskAPI;
 
     const [statusFilter, setStatusFilter] = useState("All"); // All | Pending | Completed
     const [dueDateFilter, setDueDateFilter] = useState(""); // yyyy-mm-dd or empty

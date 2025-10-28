@@ -1,42 +1,42 @@
 import axios from "axios";
-import TaskModel from "../models/TaskModel.js";
+import UserModel from "../models/UserModel.js";
 
 const apiURL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const taskAPI = {
-    createTaskApi: async (task) => {
+    registerUserApi: async (task) => {
         try {
-            const response = await axios.post(`${apiURL}/tasks`, task);
-            return response.data;
+            const response = await axios.post(`${apiURL}/users/register`, task, { withCredentials: true });
+            return response.data.user;
         } catch (error) {
             console.error("Error creating task:", error.response.data);
             return null;
         }
     },
 
-    getTasksApi: async () => {
+    loginUserApi: async (credentials) => {
         try {
-            const response = await axios.get(`${apiURL}/tasks`);
-            return response.data;
+            const response = await axios.post(`${apiURL}/users/login`, credentials, { withCredentials: true });
+            return response.data.user;
         } catch (error) {
             console.error("Error fetching tasks:", error.response.data);
-            return [];
+            return null;
         }
     },
 
-    updateTaskApi: async (id, updates) => {
+    getUserProfileApi: async (id) => {
         try {
-            const response = await axios.put(`${apiURL}/tasks/${id}`, updates);
-            return response.data;
+            const response = await axios.get(`${apiURL}/users/profile`, { withCredentials: true });
+            return response.data.user;
         } catch (error) {
             console.error("Error updating task:", error.response.data);
             return null;
         }
     },
 
-    deleteTaskApi: async (id) => {
+    logoutUserApi: async () => {
         try {
-            await axios.delete(`${apiURL}/tasks/${id}`);
+            await axios.get(`${apiURL}/users/logout`, { withCredentials: true });
             return true;
         } catch (error) {
             console.error("Error deleting task:", error.response.data);

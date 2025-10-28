@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { IoMenu, IoClose } from 'react-icons/io5'
 
-const Navbar = () => {
+const Navbar = ({ user, logoutUser }) => {
     const [open, setOpen] = useState(false)
     const links = ['Home', 'About', 'Contact']
 
@@ -36,11 +36,23 @@ const Navbar = () => {
                                 </li>
                             ))}
                         </ul>
-                        <div className="ml-4">
+
+                        {user && (<div className="flex items-center gap-4 ml-4">
+                            <div className="text-green-800 text-xl">Hello, {user.name}</div>
+
+                            <button
+                                onClick={logoutUser}
+                                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md shadow"
+                            >
+                                Logout
+                            </button>
+                        </div>)}
+
+                        {!user && (<div className="ml-4">
                             <button className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md shadow">
                                 Get Started
                             </button>
-                        </div>
+                        </div>)}
                     </div>
 
                     {/* Mobile menu button */}
