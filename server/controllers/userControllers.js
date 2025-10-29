@@ -1,5 +1,5 @@
 import User from '../models/UserModel.js';
-import { setTokenCookie, clearTokenCookie } from '../utils/jwtUtils.js';
+import { setTokenCookie, clearTokenCookie, verifyOAuthToken } from '../utils/authUtils.js';
 
 // Register a new user
 export const registerUser = async (req, res) => {
@@ -57,7 +57,8 @@ export const loginUser = async (req, res) => {
 // Get user profile
 export const getUserProfile = async (req, res) => {
     if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
-    return res.status(200).json({ user: req.user });
+    const user = { userId: req.user._id, name: req.user.name, email: req.user.email };
+    return res.status(200).json({ user });
 }
 
 // Logout a user
@@ -65,6 +66,37 @@ export const logoutUser = async (req, res) => {
     try {
         clearTokenCookie(res);
         return res.status(200).json({ message: 'Logout successful' });
+    } catch (error) {
+        return res.status(500).json({ message: 'Internal Error', error: error.message });
+    }
+}
+
+// OAuth Login User
+export const oauthloginUser = async (req, res) => {
+    try {
+        const { token } = req.body;
+
+        if (!token) return res.status(400).json({ message: 'Token is required' });
+
+        const userinfo = await verifyOAuthToken(token);
+        if (!userinfo) return res.status(400).json({ message: 'Invalid OAuth token' });
+
+        let user = await User.findOne({ email: userinfo.email });
+
+        // If user does not exist, create new user
+        if (!user) user = new User({ name: userinfo.name, email: userinfo.email, password: Math.random().toString(36).slice(-8) });
+
+        // Link OAuth info
+        const provider = userinfo.sub.split('|');
+        user.oAuthProvider = provider[0];
+        user.oAuthId = provider[1];
+
+        await user.save();
+
+        const userData = { userId: user._id, name: user.name, email: user.email };
+        setTokenCookie(res, userData);
+
+        return res.status(200).json({ message: 'OAuth login successful', user: userData });
     } catch (error) {
         return res.status(500).json({ message: 'Internal Error', error: error.message });
     }

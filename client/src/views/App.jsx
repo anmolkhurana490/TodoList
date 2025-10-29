@@ -7,7 +7,7 @@ import { Routes, Route } from 'react-router-dom'
 import './App.css'
 
 function App() {
-  const { user, loading, registerUser, loginUser, logoutUser } = useUserViewModel();
+  const { user, loading, registerUser, loginUser, logoutUser, OAuthLoginUser } = useUserViewModel();
 
   return (
     <>
@@ -16,7 +16,12 @@ function App() {
       <Routes>
         <Route path="/" element={<></>} />
         <Route path="/todos" element={<TodoList user={user} />} />
-        <Route path="/auth" element={<Auth registerUser={registerUser} loginUser={loginUser} />} />
+
+        <Route path="/auth" element={
+          <Auth registerUser={registerUser}
+            loginUser={loginUser}
+            OAuthLoginUser={OAuthLoginUser} />
+        } />
       </Routes>
 
       {loading && (

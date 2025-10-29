@@ -9,7 +9,7 @@ const taskAPI = {
             const response = await axios.post(`${apiURL}/users/register`, task, { withCredentials: true });
             return response.data.user;
         } catch (error) {
-            console.error("Error creating task:", error.response.data);
+            console.error("Error registering user:", error.response.data);
             return null;
         }
     },
@@ -19,7 +19,7 @@ const taskAPI = {
             const response = await axios.post(`${apiURL}/users/login`, credentials, { withCredentials: true });
             return response.data.user;
         } catch (error) {
-            console.error("Error fetching tasks:", error.response.data);
+            console.error("Error logging in:", error.response.data);
             return null;
         }
     },
@@ -29,7 +29,7 @@ const taskAPI = {
             const response = await axios.get(`${apiURL}/users/profile`, { withCredentials: true });
             return response.data.user;
         } catch (error) {
-            console.error("Error updating task:", error.response.data);
+            console.error("Error fetching profile:", error.response.data);
             return null;
         }
     },
@@ -39,7 +39,7 @@ const taskAPI = {
             await axios.get(`${apiURL}/users/logout`, { withCredentials: true });
             return true;
         } catch (error) {
-            console.error("Error deleting task:", error.response.data);
+            console.error("Error logging out:", error.response.data);
             return false;
         }
     }

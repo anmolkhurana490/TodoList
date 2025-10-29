@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@auth0/auth0-react": "^2.8.0",
+    "@auth0/auth0-spa-js": "^2.8.0",
     "@tailwindcss/vite": "^4.1.16",
     "axios": "^1.12.2",
     "react": "^19.1.1",

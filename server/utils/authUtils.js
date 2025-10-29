@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import axios from 'axios';
 dotenv.config();
 
 const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key';
@@ -46,4 +47,17 @@ export const clearTokenCookie = (res) => {
         sameSite: isProduction ? 'none' : 'lax',
         path: '/',
     });
+}
+
+// Verify OAuth token
+export const verifyOAuthToken = async (token) => {
+    try {
+        const userinfo = await axios.get(`https://${process.env.AUTH0_DOMAIN}/userinfo`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return userinfo.data;
+    } catch (error) {
+        // console.error('OAuth token verification failed:', error.message);
+        return null;
+    }
 }

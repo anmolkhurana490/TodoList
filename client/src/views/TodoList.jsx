@@ -4,7 +4,9 @@ import TaskViewModel from '../viewmodels/TaskViewModel';
 
 const formatDateDisplay = (iso) => iso ? new Date(iso).toLocaleDateString() : "—";
 
-const TodoList = () => {
+const TodoList = ({ user }) => {
+    if (!user) return (<></>);
+
     const {
         tasks, filtered, error,
         applyFilters, getFilters, clearFilters,

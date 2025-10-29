@@ -15,10 +15,14 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    googleId: {
+    oAuthProvider: {
         type: String,
         default: null,
     },
+    oAuthId: {
+        type: String,
+        default: null,
+    }
 });
 
 UserSchema.pre('save', function (next) {

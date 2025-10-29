@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-const Auth = ({ registerUser, loginUser }) => {
+const Auth = ({ registerUser, loginUser, OAuthLoginUser }) => {
     const [activeTab, setActiveTab] = useState('login');
+
     const [userData, setUserData] = useState({
         name: '', email: '', password: ''
     });
@@ -115,6 +116,16 @@ const Auth = ({ registerUser, loginUser }) => {
                                 {activeTab === 'login' ? 'Sign In' : 'Create Account'}
                             </button>
                         </form>
+
+                        <div className="mt-6 text-center">
+                            <p className="text-gray-600">or continue with</p>
+                            <button
+                                onClick={() => OAuthLoginUser('google-oauth2')}
+                                className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-200 transition-all duration-200"
+                            >
+                                Google
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -1,5 +1,5 @@
 import UserModel from '../models/UserModel.js';
-import { verifyToken } from '../utils/jwtUtils.js';
+import { verifyToken } from '../utils/authUtils.js';
 
 const AuthMiddleware = async (req, res, next) => {
     try {

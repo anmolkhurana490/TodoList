@@ -1,5 +1,5 @@
 import express from 'express';
-import { loginUser, registerUser, getUserProfile, logoutUser } from '../controllers/userControllers.js';
+import { loginUser, registerUser, getUserProfile, logoutUser, oauthloginUser } from '../controllers/userControllers.js';
 import authMiddleware from '../middlewares/AuthMiddleware.js';
 
 const router = express.Router();
@@ -15,5 +15,8 @@ router.get('/profile', authMiddleware, getUserProfile);
 
 // User logout route
 router.get('/logout', authMiddleware, logoutUser);
+
+// OAuth Login Route
+router.post('/oauth', oauthloginUser);
 
 export default router;
