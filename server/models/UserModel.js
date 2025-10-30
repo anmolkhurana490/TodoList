@@ -15,11 +15,11 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    oAuthProvider: {
+    oauth_provider: {
         type: String,
         default: null,
     },
-    oAuthId: {
+    oauth_access_token: {
         type: String,
         default: null,
     }

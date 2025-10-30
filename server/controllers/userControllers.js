@@ -1,5 +1,6 @@
 import User from '../models/UserModel.js';
-import { setTokenCookie, clearTokenCookie, verifyOAuthToken } from '../utils/authUtils.js';
+import { setTokenCookie, clearTokenCookie, verifyOAuthUser, getAccessIdentity } from '../utils/authUtils.js';
+import axios from 'axios';
 
 // Register a new user
 export const registerUser = async (req, res) => {
@@ -78,7 +79,7 @@ export const oauthloginUser = async (req, res) => {
 
         if (!token) return res.status(400).json({ message: 'Token is required' });
 
-        const userinfo = await verifyOAuthToken(token);
+        const userinfo = await verifyOAuthUser(token);
         if (!userinfo) return res.status(400).json({ message: 'Invalid OAuth token' });
 
         let user = await User.findOne({ email: userinfo.email });
@@ -86,10 +87,13 @@ export const oauthloginUser = async (req, res) => {
         // If user does not exist, create new user
         if (!user) user = new User({ name: userinfo.name, email: userinfo.email, password: Math.random().toString(36).slice(-8) });
 
-        // Link OAuth info
-        const provider = userinfo.sub.split('|');
-        user.oAuthProvider = provider[0];
-        user.oAuthId = provider[1];
+        // Link OAuth info (provider and access token)
+        // Currently, we assume it only supports Google OAuth
+        const idp = await getAccessIdentity(userinfo.sub);
+        user.oauth_provider = idp.provider;
+        user.oauth_access_token = idp.access_token;
+
+        console.log(idp.access_token)
 
         await user.save();
 

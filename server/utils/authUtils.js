@@ -50,14 +50,56 @@ export const clearTokenCookie = (res) => {
 }
 
 // Verify OAuth token
-export const verifyOAuthToken = async (token) => {
+export const verifyOAuthUser = async (token) => {
     try {
         const userinfo = await axios.get(`https://${process.env.AUTH0_DOMAIN}/userinfo`, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'content-type': 'application/json'
+            }
         });
+
         return userinfo.data;
     } catch (error) {
         // console.error('OAuth token verification failed:', error.message);
         return null;
+    }
+}
+
+const getAuth0ManagementToken = async () => {
+    try {
+        const response = await axios.post(`https://${process.env.AUTH0_DOMAIN}/oauth/token`,
+            JSON.stringify({
+                "client_id": process.env.AUTH0_CLIENT_M2M_ID,
+                "client_secret": process.env.AUTH0_CLIENT_M2M_SECRET,
+                "audience": `https://${process.env.AUTH0_DOMAIN}/api/v2/`,
+                "grant_type": "client_credentials"
+            }),
+            { headers: { 'content-type': 'application/json' } }
+        );
+
+        return response.data.access_token;
+    } catch (error) {
+        console.error('Error fetching Management Token:', error.message);
+    }
+};
+
+
+export const getAccessIdentity = async (auth0TokenId) => {
+    try {
+        const managementToken = await getAuth0ManagementToken();
+
+        const response = await axios.get(`https://${process.env.AUTH0_DOMAIN}/api/v2/users/${auth0TokenId}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${managementToken}`,
+                    'content-type': 'application/json'
+                }
+            }
+        );
+
+        return response.data.identities[0];
+    } catch (error) {
+        console.error('Error fetching Access Token:', error.message);
     }
 }

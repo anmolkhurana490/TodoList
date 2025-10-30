@@ -17,6 +17,15 @@ const TaskSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true,
+        },
+        googlEventId: {
+            type: String,
+            default: null,
+        },
     },
     { timestamps: true }
 );

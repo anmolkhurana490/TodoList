@@ -9,6 +9,7 @@ export class OAuthService {
             domain: import.meta.env.VITE_AUTH0_DOMAIN,
             clientId: import.meta.env.VITE_AUTH0_CLIENT_ID,
             authorizationParams: {
+                scope: 'openid profile email https://www.googleapis.com/auth/calendar offline_access',
                 redirect_uri: window.location.origin,
             },
             cacheLocation: 'localstorage',
@@ -17,10 +18,18 @@ export class OAuthService {
 
     async login(connection) {
         try {
-            await this.auth0Client.loginWithPopup({ connection });
+            await this.auth0Client.loginWithPopup({
+                connection,
+                authorizationParams: {
+                    scope: 'openid profile email https://www.googleapis.com/auth/calendar offline_access'
+                }
+            });
+
             const user = await this.auth0Client.getUser();
-            const accessToken = await this.auth0Client.getTokenSilently();
-            return { user, token: accessToken };
+            const response = await this.auth0Client.getTokenSilently({ detailedResponse: true });
+            console.log("OAuth login response:", response);
+
+            return { user, token: response.access_token };
         }
         catch (error) {
             console.error("OAuth login failed:", error);
