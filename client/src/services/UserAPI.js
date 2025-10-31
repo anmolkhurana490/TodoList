@@ -42,6 +42,16 @@ const taskAPI = {
             console.error("Error logging out:", error.response.data);
             return false;
         }
+    },
+
+    getAllUsersApi: async () => {
+        try {
+            const response = await axios.get(`${apiURL}/users/all`, { withCredentials: true });
+            return response.data.users;
+        } catch (error) {
+            console.error("Error fetching users:", error.response.data);
+            return [];
+        }
     }
 };
 

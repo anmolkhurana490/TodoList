@@ -72,6 +72,17 @@ export const logoutUser = async (req, res) => {
     }
 }
 
+// Get all users (Team feature)
+export const getAllUsers = async (req, res) => {
+    try {
+        const users = await User.find({}, 'name email'); // Exclude sensitive info
+        return res.status(200).json({ users });
+    }
+    catch (error) {
+        return res.status(500).json({ message: 'Internal Error', error: error.message });
+    }
+}
+
 // OAuth Login User
 export const oauthloginUser = async (req, res) => {
     try {

@@ -1,6 +1,9 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { FiEdit, FiTrash2, FiPlus, FiSearch, FiX } from "react-icons/fi";
+import { MdMoreVert } from "react-icons/md";
 import TaskViewModel from '../viewmodels/TaskViewModel';
+import { DatePicker } from 'antd';
+import dayjs from 'dayjs'
 
 const formatDateDisplay = (iso) => iso ? new Date(iso).toLocaleDateString() : "—";
 
@@ -8,8 +11,8 @@ const TodoList = ({ user }) => {
     if (!user) return (<></>);
 
     const {
-        tasks, filtered, error,
-        applyFilters, getFilters, clearFilters,
+        filtered, error,
+        applyFilters, getFilters,
         createTask, updateTask, toggleCompleteTask, removeTask
     } = TaskViewModel();
 
@@ -58,119 +61,154 @@ const TodoList = ({ user }) => {
         setForm({ title: "", description: "", dueDate: "", completed: false });
     };
 
+    const filters = getFilters();
+
+    // Array of different gradient backgrounds, used to style task cards
+    const gradients = [
+        'bg-gradient-to-br from-purple-100 to-pink-100',
+        'bg-gradient-to-br from-blue-100 to-cyan-100',
+        'bg-gradient-to-br from-green-100 to-emerald-100',
+        'bg-gradient-to-br from-yellow-100 to-orange-100',
+        'bg-gradient-to-br from-red-100 to-rose-100',
+        'bg-gradient-to-br from-indigo-100 to-purple-100',
+        'bg-gradient-to-br from-teal-100 to-green-100',
+        'bg-gradient-to-br from-orange-100 to-red-100'
+    ];
+
+    // Opened card more options state
+    const [openedCardOp, setOpenedCardOp] = useState(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (!event.target.closest('.more-options')) {
+                setOpenedCardOp(null);
+            }
+        };
+        document.addEventListener('click', handleClickOutside);
+    }, []);
+
     return (
-        <div className="todo-list-container bg-linear-to-br from-blue-100 to-indigo-50 min-h-screen p-2 sm:p-6">
-            <div className="max-w-6xl mx-auto">
-                <header className="flex items-center justify-between mb-6">
-                    <h1 className="text-2xl sm:text-3xl font-semibold text-slate-800">
-                        Beautiful Todo List
-                    </h1>
+        <div className="todo-list-container bg-linear-to-br from-blue-100 to-indigo-50 h-full px-4 py-2">
+            <HeaderSection
+                filters={filters}
+                applyFilters={applyFilters}
+                openNew={openNew}
+            />
 
-                    <div className="flex gap-3 items-center">
-                        <button
-                            onClick={openNew}
-                            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded shadow"
-                        >
-                            <FiPlus />
-                            New Task
-                        </button>
-                    </div>
-                </header>
+            <div className="h-screen flex flex-col">
+                {/* Status Tabs */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                    <button className="rounded-lg shadow bg-white px-4 py-1" onClick={() => applyFilters('All', filters.dueDate, filters.query)}>
+                        All Tasks
+                    </button>
+                    <button className="rounded-lg shadow bg-white px-4 py-1" onClick={() => applyFilters('Pending', filters.dueDate, filters.query)}>
+                        Pending
+                    </button>
+                    <button className="rounded-lg shadow bg-white px-4 py-1" onClick={() => applyFilters('Completed', filters.dueDate, filters.query)}>
+                        Completed
+                    </button>
+                </div>
 
-                <section className="bg-white shadow rounded-lg p-2 sm:p-4">
-                    <FilterSection
-                        getFilters={getFilters}
-                        applyFilters={applyFilters}
-                        clearFilters={clearFilters}
-                        numFiltered={filtered.length}
-                        numTasks={tasks.length}
-                    />
+                <section className="bg-white shadow-lg rounded-lg p-4 sm:p-6 flex-1 overflow-hidden flex flex-col">
 
-                    {/* Table header */}
-                    <div className="hidden sm:grid grid-cols-[2fr_3fr_1fr_1fr_40px] gap-2 text-slate-600 text-sm font-medium border-b pb-2 mb-2">
-                        <div>Title</div>
-                        <div>Description</div>
-                        <div>Due Date</div>
-                        <div>Completed</div>
-                        <div className="sr-only">Actions</div>
-                    </div>
+                    {/* Task List - Scrollable */}
+                    <div className="flex-1 overflow-auto">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-2">
+                            {filtered.map(t => {
+                                const cardGradient = gradients[Math.floor(Math.random() * gradients.length)];
 
-                    {/* List */}
-                    <ul className="space-y-3">
-                        {filtered.map((t) => (
-                            <li
-                                key={t.id}
-                                className="bg-white border rounded-lg shadow-sm p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4"
-                            >
-                                <div className="flex-1">
-                                    <div className="flex flex-wrap items-start justify-between gap-3">
-                                        <div className="flex-1 min-w-full sm:min-w-100">
-                                            <h3 className="text-lg font-semibold text-slate-800">{t.title}</h3>
-                                            <p className="text-sm text-slate-500 mt-1 hidden sm:block">
-                                                {t.description}
-                                            </p>
-                                        </div>
+                                return (
+                                    <div
+                                        key={t.id}
+                                        className={`${cardGradient} relative border border-gray-200 rounded-xl shadow-md p-4 flex flex-col min-h-56 transition-all duration-200 hover:shadow-lg hover:scale-[1.02]`}
+                                    >
+                                        {/* Card Header */}
+                                        <div className="flex items-start justify-between mb-3">
+                                            <h3 className="text-lg font-semibold text-slate-800 line-clamp-2 flex-1 pr-2">
+                                                {t.title}
+                                            </h3>
 
-                                        <div className="max-md:w-full">
-                                            <div className="flex gap-3 sm:justify-between md:flex-col sm:items-end">
-                                                <div className="text-sm text-slate-500 sm:text-right">
-                                                    <div className="font-medium text-slate-800">
-                                                        {formatDateDisplay(t.dueDate)}
-                                                    </div>
-                                                    <div className="text-xs mt-1">
-                                                        {t.completed ? (
-                                                            <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
-                                                                Completed
-                                                            </span>
-                                                        ) : (
-                                                            <span className="px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded-full">
-                                                                Pending
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </div>
+                                            <div className="flex items-center gap-2">
+                                                {t.completed ? (
+                                                    <span className="px-2 py-1 bg-green-200 text-green-800 rounded-full text-xs font-medium whitespace-nowrap">
+                                                        Done
+                                                    </span>
+                                                ) : (
+                                                    <span className="px-2 py-1 bg-amber-200 text-amber-800 rounded-full text-xs font-medium whitespace-nowrap">
+                                                        Pending
+                                                    </span>
+                                                )}
 
-                                                <div className="flex items-center gap-2">
-                                                    <button
-                                                        onClick={() => toggleCompleteTask(t.id)}
-                                                        className={`px-3 py-1 rounded text-sm font-medium ${t.completed
-                                                            ? "bg-green-50 text-green-700 border border-green-100"
-                                                            : "bg-yellow-50 text-yellow-800 border border-yellow-100"
-                                                            }`}
-                                                    >
-                                                        {t.completed ? "Mark Pending" : "Mark Done"}
-                                                    </button>
-
-                                                    <button
-                                                        onClick={() => openEdit(t)}
-                                                        className="p-2 rounded text-indigo-600 hover:bg-indigo-50"
-                                                        title="Edit"
-                                                    >
-                                                        <FiEdit />
-                                                    </button>
-
-                                                    <button
-                                                        onClick={() => removeTask(t.id)}
-                                                        className="p-2 rounded text-red-600 hover:bg-red-50"
-                                                        title="Delete"
-                                                    >
-                                                        <FiTrash2 />
-                                                    </button>
-                                                </div>
+                                                <button
+                                                    className="more-options text-lg hover:bg-gray-200/50 hover:text-slate-700 rounded-full p-1 transition-colors duration-150"
+                                                    onClick={() => setOpenedCardOp(openedCardOp === t.id ? null : t.id)}
+                                                >
+                                                    <MdMoreVert />
+                                                </button>
                                             </div>
                                         </div>
+
+                                        {/* Card Content */}
+                                        <div className="flex-1 flex flex-col">
+                                            <p className="text-sm text-slate-600 line-clamp-3 mb-3 flex-1">
+                                                {t.description || "No description provided"}
+                                            </p>
+
+                                            <div className="text-lg font-semibold text-slate-500 mb-3">
+                                                Due: {formatDateDisplay(t.dueDate)}
+                                            </div>
+                                        </div>
+
+                                        {/* More Options Menu */}
+                                        {openedCardOp === t.id && (
+                                            <div className="absolute top-12 right-2 bg-white rounded-lg shadow-lg border p-2 z-10 min-w-24">
+                                                <button
+                                                    onClick={() => {
+                                                        openEdit(t);
+                                                        setOpenedCardOp(null);
+                                                    }}
+                                                    className="w-full flex items-center gap-2 p-2 rounded text-indigo-700 hover:bg-indigo-50 transition-colors duration-150"
+                                                >
+                                                    <FiEdit size={14} />
+                                                    <span className="text-sm">Edit</span>
+                                                </button>
+
+                                                <button
+                                                    onClick={() => {
+                                                        removeTask(t.id);
+                                                        setOpenedCardOp(null);
+                                                    }}
+                                                    className="w-full flex items-center gap-2 p-2 rounded text-red-700 hover:bg-red-50 transition-colors duration-150"
+                                                >
+                                                    <FiTrash2 size={14} />
+                                                    <span className="text-sm">Delete</span>
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        {/* Toggle Complete Button */}
+                                        <button
+                                            onClick={() => toggleCompleteTask(t.id)}
+                                            className={`w-full px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-150 ${t.completed
+                                                ? "bg-green-200 hover:bg-green-300 text-green-800"
+                                                : "bg-amber-200 hover:bg-amber-300 text-amber-800"
+                                                }`}
+                                        >
+                                            {t.completed ? "Mark as Pending" : "Mark as Done"}
+                                        </button>
                                     </div>
+                                );
+                            })}
 
-                                    {/* Mobile description */}
-                                    <p className="text-sm text-slate-500 mt-3 sm:hidden">{t.description}</p>
+                            {filtered.length === 0 && (
+                                <div className="col-span-full text-center text-slate-500 py-12">
+                                    <div className="text-4xl mb-4">📝</div>
+                                    <p className="text-lg font-medium mb-2">No tasks found</p>
+                                    <p className="text-sm">Try adjusting your filters or create a new task</p>
                                 </div>
-                            </li>
-                        ))}
-
-                        {filtered.length === 0 && (
-                            <li className="text-center text-slate-500 py-8">No tasks match your filters.</li>
-                        )}
-                    </ul>
+                            )}
+                        </div>
+                    </div>
                 </section>
             </div>
 
@@ -188,67 +226,49 @@ const TodoList = ({ user }) => {
 };
 
 // Filter Section Component
-const FilterSection = ({ getFilters, applyFilters, clearFilters, numFiltered, numTasks }) => {
-    const filters = getFilters();
-
-    const onChangeFilters = (taskStatus = filters.status, dueDate = filters.dueDate, query = filters.query) => {
-        applyFilters(taskStatus, dueDate, query);
-    }
+const HeaderSection = ({ filters, applyFilters, openNew }) => {
 
     return (
-        <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between mb-4">
-            <div className="flex flex-wrap gap-3 flex-1">
-                <div className="flex items-center bg-slate-50 rounded px-3 py-2 gap-2">
-                    <FiSearch className="text-slate-400" />
-                    <input
-                        value={filters.query}
-                        onChange={(e) => onChangeFilters(query = e.target.value)}
-                        placeholder="Search title or description..."
-                        className="bg-transparent outline-none text-slate-700"
-                    />
-                    {filters.query && (
-                        <button
-                            className="ml-2 text-slate-400 hover:text-slate-700"
-                            onClick={() => setQuery("")}
-                            aria-label="clear"
-                        >
-                            <FiX />
-                        </button>
-                    )}
-                </div>
-
-                <select
-                    value={filters.status}
-                    onChange={(e) => onChangeFilters(taskStatus = e.target.value)}
-                    className="px-3 py-2 rounded border bg-white"
-                >
-                    <option>All</option>
-                    <option>Pending</option>
-                    <option>Completed</option>
-                </select>
-
-                <input
-                    type="date"
-                    value={filters.dueDate}
-                    onChange={(e) => onChangeFilters(dueDate = e.target.value)}
-                    className="px-3 py-2 rounded border bg-white"
-                    title="Filter by due date (show tasks due on or before)"
+        <div className="mb-4 p-4 rounded-b-lg shadow sticky top-0 z-10 bg-linear-to-br from-blue-300 to-blue-200">
+            <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
+                <DatePicker
+                    value={filters.dueDate ? dayjs(filters.dueDate) : null}
+                    onChange={(date, dateString) => applyFilters(filters.status, dateString, filters.query)}
+                    placeholder="Filter by due date"
+                    allowClear
+                    className="w-full sm:w-48"
                 />
 
-                <button
-                    onClick={clearFilters}
-                    className="px-3 py-2 rounded border bg-slate-50"
-                    title="Reset filters"
-                >
-                    Reset
-                </button>
-            </div>
+                <div className="flex flex-wrap gap-3 justify-end">
+                    <div className="flex items-center bg-slate-50 rounded px-3 py-2 gap-2">
+                        <FiSearch className="text-slate-400" />
+                        <input
+                            value={filters.query}
+                            onChange={(e) => applyFilters(filters.status, filters.dueDate, e.target.value)}
+                            placeholder="Search title or description..."
+                            className="bg-transparent outline-none text-slate-700"
+                        />
+                        {filters.query && (
+                            <button
+                                className="ml-2 text-slate-400 hover:text-slate-700"
+                                onClick={() => applyFilters(filters.status, filters.dueDate, "")}
+                                aria-label="clear"
+                            >
+                                <FiX />
+                            </button>
+                        )}
+                    </div>
 
-            <div className="text-sm text-slate-500">
-                Showing <span className="font-medium text-slate-700">{numFiltered}</span> of{" "}
-                <span className="font-medium text-slate-700">{numTasks}</span> tasks
-            </div>
-        </div>
+                    <button
+                        onClick={openNew}
+                        className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-md transition-colors duration-150"
+                    >
+                        <FiPlus />
+                        New Task
+                    </button>
+                </div>
+            </div >
+        </div >
     );
 }
 
@@ -288,14 +308,17 @@ const EditCreateModal = ({ form, setForm, onSave, onClose, error, isNew }) => {
                         />
                     </div>
 
-                    <div className="flex gap-3">
-                        <div className="flex-1">
+                    <div className="flex gap-3 items-center flex-wrap">
+                        <div className="flex gap-2 items-center">
                             <label className="text-sm font-medium text-slate-700">Due date</label>
-                            <input
-                                type="date"
-                                value={form.dueDate}
-                                onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
-                                className="mt-1 w-full px-3 py-2 border rounded"
+                            <DatePicker
+                                value={form.dueDate ? dayjs(form.dueDate) : null}
+                                onChange={(date, dateString) => {
+                                    setForm({ ...form, dueDate: dateString });
+                                }}
+                                placeholder="Select due date"
+                                allowClear
+                                className=""
                             />
                         </div>
 
