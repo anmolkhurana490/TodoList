@@ -12,10 +12,10 @@ export const createTask = async (req, res) => {
         const newTask = new Task({ title, description, dueDate, userId: req.user._id });
 
         // Add Task to Google Calendar if Google OAuth is used
-        // if (req.user.oauth_provider.includes('google')) {
-        //     const calenderEvent = await addTaskToCalender(newTask, req.user.oauth_access_token);
-        //     newTask.googlEventId = calenderEvent.id;
-        // }
+        if (req.user.oauth_provider.includes('google')) {
+            const calenderEvent = await addTaskToCalender(newTask, req.user.oauth_access_token);
+            newTask.googlEventId = calenderEvent.id;
+        }
 
         const savedTask = await newTask.save();
 
@@ -45,9 +45,9 @@ export const updateTask = async (req, res) => {
         if (!updateTask) return res.status(404).json({ message: 'Task not found' });
 
         // Update Task in Google Calendar if Google OAuth is used
-        // if (updateTask.googlEventId && req.user.oAuth_sub.includes('google')) {
-        //     await updateTaskToCalender(updateTask._doc, req.user.accessToken);
-        // }
+        if (updateTask.googlEventId && req.user.oAuth_sub.includes('google')) {
+            await updateTaskToCalender(updateTask._doc, req.user.accessToken);
+        }
 
         res.status(200).json({ ...updatedTask._doc, id: updatedTask._id });
     } catch (error) {

@@ -174,30 +174,6 @@ const AuthSideContainer = () => {
                     </div>
                 </div>
             </div>
-
-            <style jsx>{`
-                @keyframes fade-in {
-                    from { opacity: 0; transform: translateY(20px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-                @keyframes slide-up {
-                    from { opacity: 0; transform: translateY(30px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-                @keyframes fade-in-delay {
-                    from { opacity: 0; transform: scale(0.9); }
-                    to { opacity: 1; transform: scale(1); }
-                }
-                .animate-fade-in {
-                    animation: fade-in 0.8s ease-out;
-                }
-                .animate-slide-up {
-                    animation: slide-up 0.8s ease-out 0.3s both;
-                }
-                .animate-fade-in-delay {
-                    animation: fade-in-delay 0.8s ease-out 0.6s both;
-                }
-            `}</style>
         </div>
     )
 }

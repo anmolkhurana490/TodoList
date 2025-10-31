@@ -104,8 +104,6 @@ export const oauthloginUser = async (req, res) => {
         user.oauth_provider = idp.provider;
         user.oauth_access_token = idp.access_token;
 
-        console.log(idp.access_token)
-
         await user.save();
 
         const userData = { userId: user._id, name: user.name, email: user.email };
